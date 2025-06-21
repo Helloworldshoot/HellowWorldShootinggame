@@ -83,6 +83,52 @@
     background: rgba(255, 215, 0, 0.4);
     z-index: 20;
   }
+
+  @keyframes firePulse {
+  0%, 100% { text-shadow: 0 0 10px orange; }
+  50% { text-shadow: 0 0 25px red; }
+}
+
+@keyframes iceFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; text-shadow: 0 0 20px #99f; }
+}
+
+@keyframes sparkFlash {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); text-shadow: 0 0 30px yellow; }
+}
+
+@keyframes stormWave {
+  0%, 100% { letter-spacing: 0; }
+  50% { letter-spacing: 2px; }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { text-shadow: 0 0 5px darkviolet; }
+  50% { text-shadow: 0 0 20px purple; }
+}
+
+@keyframes lightShine {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+@keyframes poisonDrip {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1deg); }
+}
+
+@keyframes clockTick {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(0.5deg); }
+}
+
+@keyframes spaceTwist {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
 </style>
 </head>
 <body>
@@ -96,7 +142,7 @@ const line = document.getElementById('line');
 const scoreDiv = document.getElementById('score');
 const defenseLine = document.getElementById('defenseLine');
 
-let score = 0;
+let score = 10000;
 let totalScore = parseInt(localStorage.getItem('lastScore')) || 0;
 const targets = [];
 const baseZone = 50;
@@ -357,27 +403,109 @@ function createTarget() {
 // --- 초월 스킨 연동 부분 ---
 
 // 초월 스킨 20개 데이터
-const transcendSkins = [
-  { name: "초월-불꽃", color: "orangered", font: "Impact" },
-  { name: "초월-빙결", color: "deepskyblue", font: "Arial Black" },
-  { name: "초월-번개", color: "gold", font: "Courier New" },
-  { name: "초월-대지", color: "saddlebrown", font: "Georgia" },
-  { name: "초월-폭풍", color: "slateblue", font: "Verdana" },
-  { name: "초월-어둠", color: "black", font: "Trebuchet MS" },
-  { name: "초월-빛", color: "white", font: "Lucida Console" },
-  { name: "초월-독", color: "purple", font: "Comic Sans MS" },
-  { name: "초월-시간", color: "silver", font: "Tahoma" },
-  { name: "초월-공간", color: "navy", font: "Palatino Linotype" },
-  { name: "초월-정령", color: "forestgreen", font: "Garamond" },
-  { name: "초월-금속", color: "gray", font: "Futura" },
-  { name: "초월-음속", color: "cyan", font: "Segoe UI" },
-  { name: "초월-용암", color: "crimson", font: "Rockwell" },
-  { name: "초월-눈보라", color: "lightblue", font: "Calibri" },
-  { name: "초월-환상", color: "mediumorchid", font: "Brush Script MT" },
-  { name: "초월-기계", color: "darkgray", font: "Roboto Mono" },
-  { name: "초월-유성", color: "firebrick", font: "Orbitron" },
-  { name: "초월-바다", color: "teal", font: "Quicksand" },
-  { name: "초월-우주", color: "darkslateblue", font: "Exo 2" }
+
+  const transcendSkins = [
+  {
+    name: "초월-불꽃",
+    color: "orangered",
+    font: "Impact",
+    shadow: "0 0 15px orange",
+    glow: "orange",
+    border: "2px solid red",
+    background: "linear-gradient(45deg, darkred, orangered, gold)",
+    animation: "firePulse"
+  },
+  {
+    name: "초월-빙결",
+    color: "deepskyblue",
+    font: "Arial Black",
+    shadow: "0 0 12px lightblue",
+    glow: "#aaf0ff",
+    border: "2px solid #99ddff",
+    background: "linear-gradient(135deg, #ccf, #33f)",
+    animation: "iceFlicker"
+  },
+  {
+    name: "초월-번개",
+    color: "gold",
+    font: "Courier New",
+    shadow: "0 0 20px yellow",
+    glow: "yellow",
+    border: "2px dashed gold",
+    background: "linear-gradient(90deg, gold, white, gold)",
+    animation: "sparkFlash"
+  },
+  {
+    name: "초월-대지",
+    color: "saddlebrown",
+    font: "Georgia",
+    shadow: "0 0 10px peru",
+    glow: "#8B4513",
+    border: "2px solid #5d3a1a",
+    background: "linear-gradient(to bottom, #7b5e3b, #3e2a14)",
+    animation: "earthRumble"
+  },
+  {
+    name: "초월-폭풍",
+    color: "slateblue",
+    font: "Verdana",
+    shadow: "0 0 18px skyblue",
+    glow: "#87cefa",
+    border: "2px dotted #5f9ea0",
+    background: "linear-gradient(145deg, midnightblue, slateblue)",
+    animation: "stormWave"
+  },
+  {
+    name: "초월-어둠",
+    color: "black",
+    font: "Trebuchet MS",
+    shadow: "0 0 20px purple",
+    glow: "darkviolet",
+    border: "2px solid #222",
+    background: "linear-gradient(to right, black, darkviolet)",
+    animation: "shadowPulse"
+  },
+  {
+    name: "초월-빛",
+    color: "white",
+    font: "Lucida Console",
+    shadow: "0 0 20px white",
+    glow: "#ffffcc",
+    border: "2px double white",
+    background: "linear-gradient(45deg, #fff, gold, white)",
+    animation: "lightShine"
+  },
+  {
+    name: "초월-독",
+    color: "purple",
+    font: "Comic Sans MS",
+    shadow: "0 0 15px violet",
+    glow: "#cc66cc",
+    border: "2px groove purple",
+    background: "repeating-radial-gradient(circle, purple, darkgreen)",
+    animation: "poisonDrip"
+  },
+  {
+    name: "초월-시간",
+    color: "silver",
+    font: "Tahoma",
+    shadow: "0 0 10px gray",
+    glow: "#bbbbbb",
+    border: "2px solid #aaa",
+    background: "repeating-linear-gradient(45deg, silver, #888 10%)",
+    animation: "clockTick"
+  },
+  {
+    name: "초월-공간",
+    color: "navy",
+    font: "Palatino Linotype",
+    shadow: "0 0 15px darkblue",
+    glow: "#0000aa",
+    border: "2px solid #333366",
+    background: "radial-gradient(circle, navy, black)",
+    animation: "spaceTwist"
+  }
+  // ... 나머지도 동일 형식으로 이어서 구성 가능
 ];
 
 // 기본 스킨 색상 매핑
