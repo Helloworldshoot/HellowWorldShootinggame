@@ -1,289 +1,566 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Angry Hello World with Defense Line - Start</title>
+<title>Hello World Shoot</title>
 <style>
   body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     background-color: #0a0a0a;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
+    overflow: hidden;
     user-select: none;
-  }
-  h1 { text-align: center; padding-top: 40px; }
-  #scoreDisplay, #starDisplay {
-    text-align: center;
-    font-size: 1.5em;
-  }
-  #helloPreview {
-    font-size: 5em;
-    margin: 30px auto;
-    text-align: center;
-    user-select: none;
-    transition: color 0.5s ease, background-image 0.5s ease, font-family 0.5s ease;
-  }
-  #buttons {
-    text-align: center;
-    margin: 20px;
-  }
-  button {
-    font-size: 1em;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 6px;
-    cursor: pointer;
-    background-color: #333;
-    color: white;
-    border: none;
-  }
-  #popup {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: #222;
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-    z-index: 1000;
-    max-width: 90vw;
-    color: white;
-  }
-  #popup h3 { margin-top: 0; }
-  #popup button.skin {
-    display: inline-block;
-    margin: 5px;
-    padding: 6px 10px;
-    border-radius: 4px;
-    background-color: #444;
     position: relative;
+    touch-action: none; /* 모바일 터치 방지 */
+    font-size: 16px; /* 모바일 대응 폰트 */
   }
-  .checkmark {
+  #hello {
     position: absolute;
-    top: -5px; right: -5px;
-    background: lime;
-    color: black;
-    border-radius: 50%;
-    width: 18px; height: 18px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 3.5em;
+    color: white;
+    text-shadow: 2px 2px 10px gold;
+    cursor: grab;
+    user-select: none;
+    left: 100px;
+    top: 300px;
+    z-index: 10;
+    transition: color 0.5s ease, background-image 0.5s ease;
   }
+  #line {
+    position: absolute;
+    background: gold;
+    height: 3px;
+    border-radius: 2px;
+    pointer-events: none;
+    display: none;
+  }
+  #score {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+    user-select: none;
+    z-index: 100;
+  }
+  .target, .target-square {
+    position: absolute;
+    user-select: none;
+    width: 80px;
+    height: 80px;
+  }
+  .target {
+    background: crimson;
+    border-radius: 50%;
+    box-shadow: 0 0 15px crimson;
+  }
+  .target-square {
+    background: royalblue;
+    box-shadow: 0 0 15px royalblue;
+  }
+  .health-bar {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: rgba(255,255,255,0.2);
+  }
+  .health-fill {
+    height: 100%;
+    background: limegreen;
+    width: 100%;
+  }
+  #defenseLine {
+    position: absolute;
+    left: 190px;
+    top: 0;
+    width: 5px;
+    height: 100vh;
+    background: rgba(255, 215, 0, 0.4);
+    z-index: 20;
+  }
+
+  @keyframes firePulse {
+  0%, 100% { text-shadow: 0 0 10px orange; }
+  50% { text-shadow: 0 0 25px red; }
+}
+
+@keyframes iceFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; text-shadow: 0 0 20px #99f; }
+}
+
+@keyframes sparkFlash {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); text-shadow: 0 0 30px yellow; }
+}
+
+@keyframes stormWave {
+  0%, 100% { letter-spacing: 0; }
+  50% { letter-spacing: 2px; }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { text-shadow: 0 0 5px darkviolet; }
+  50% { text-shadow: 0 0 20px purple; }
+}
+
+@keyframes lightShine {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+@keyframes poisonDrip {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1deg); }
+}
+
+@keyframes clockTick {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(0.5deg); }
+}
+
+@keyframes spaceTwist {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
 </style>
 </head>
 <body>
-<h1>Hello World! 슈팅 게임 (Made by 범서) Ver 1.41</h1>
-<div id="scoreDisplay">Score: 0</div>
-<div id="starDisplay">초월 횟수: 0 ⭐</div>
-<!-- 추가: Hello World! 미리보기 -->
-<div id="helloPreview">Hello World!</div>
-
-<div id="buttons">
-  <button onclick="location.href='game.html'">▶️ 게임 시작</button>
-  <button onclick="showSkinCollection()">🎁 일반 스킨 뽑기</button>
-  <button onclick="showTransCollection()">🌌 초월 스킨 보기</button>
-  <button onclick="tryTranscendence()">✨ 초월하기</button>
-</div>
-<div id="popup"></div>
-
+<div id="hello">Hello World!</div>
+<div id="line"></div>
+<div id="score">Score: 0</div>
+<div id="defenseLine"></div>
 <script>
-const popup = document.getElementById('popup');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const starDisplay = document.getElementById('starDisplay');
-const helloPreview = document.getElementById('helloPreview');
+const hello = document.getElementById('hello');
+const line = document.getElementById('line');
+const scoreDiv = document.getElementById('score');
+const defenseLine = document.getElementById('defenseLine');
 
-let score = parseInt(localStorage.getItem('lastScore')) || 0;
-let ownedSkins = JSON.parse(localStorage.getItem('helloSkins')) || ['기본'];
-let selectedSkin = localStorage.getItem('helloSelectedSkin') || '기본';
-let selectedTransSkin = localStorage.getItem('helloSelectedTransSkin') || '';
-let transSkins = JSON.parse(localStorage.getItem('transSkins')) || [];
-let transCount = parseInt(localStorage.getItem('transCount')) || 0;
+let score = 10000;
+let totalScore = parseInt(localStorage.getItem('lastScore')) || 0;
+const targets = [];
+const baseZone = 50;
+let paused = false;
+let isDragging = false;
+let startX, startY;
+let velocityX = 0, velocityY = 0;
+let posX = parseFloat(hello.style.left) || 100;
+let posY = parseFloat(hello.style.top) || 300;
+const gravity = 0.5;
+let bounce = 0.7;
+let friction = 0.98;
+let launched = false;
+let hitId = 1;
 
-scoreDisplay.textContent = 'Score: ' + score;
-starDisplay.textContent = `초월 횟수: ${transCount} ⭐`;
+function showGameOver() {
+  paused = true;
+  totalScore += score;
+  localStorage.setItem('lastScore', totalScore);
 
-const skins = [
-  { name: "기본", rarity: "common", color: "white" },
-  { name: "빨강", rarity: "common", color: "red" },
-  { name: "파랑", rarity: "common", color: "blue" },
-  { name: "초록", rarity: "common", color: "green" },
-  { name: "노랑", rarity: "common", color: "yellow" },
-  { name: "보라", rarity: "common", color: "purple" },
-  { name: "검정", rarity: "rare", color: "black" },
-  { name: "청록", rarity: "rare", color: "teal" },
-  { name: "핑크", rarity: "rare", color: "pink" },
-  { name: "레인보우", rarity: "legendary", color: "linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)" }
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.background = 'rgba(0,0,0,0.85)';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.color = 'white';
+  overlay.style.fontSize = '2em';
+  overlay.innerHTML = `게임 오버!<br><br>누적 점수: ${totalScore}<br><button style="margin-top:20px;font-size:1em;padding:10px 20px;cursor:pointer" onclick="location.href='index.html'">시작화면으로 돌아가기</button>`;
+  document.body.appendChild(overlay);
+}
+
+function createTarget() {
+  if (targets.length >= 7 || paused) return;
+  const isSquare = Math.random() < 0.2;
+  const t = document.createElement('div');
+  t.className = isSquare ? 'target-square' : 'target';
+  t.dataset.score = isSquare ? 2 : 1;
+  t.dataset.hp = 3;
+  t.dataset.lastHit = '0';
+  t.style.left = (window.innerWidth + 50) + 'px';
+  t.style.top = (Math.random() * (window.innerHeight - 130) + 50) + 'px';
+
+  const healthBar = document.createElement('div');
+  healthBar.className = 'health-bar';
+  const healthFill = document.createElement('div');
+  healthFill.className = 'health-fill';
+  healthBar.appendChild(healthFill);
+  t.appendChild(healthBar);
+
+  document.body.appendChild(t);
+  targets.push(t);
+}
+
+for (let i = 0; i < 3; i++) createTarget();
+setInterval(() => { if (!paused) createTarget(); }, 3000);
+
+function reset() {
+  launched = false;
+  velocityX = velocityY = 0;
+  bounce = 0.7;
+  posX = 100;
+  posY = 300;
+  hello.style.left = posX + 'px';
+  hello.style.top = posY + 'px';
+  hello.style.cursor = 'grab';
+  hitId++;
+}
+
+function updateLine(x, y) {
+  const dx = startX - x;
+  const dy = startY - y;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  line.style.width = length + 'px';
+  line.style.left = startX + 'px';
+  line.style.top = startY + 'px';
+  line.style.transformOrigin = '0 50%';
+  line.style.transform = `rotate(${angle}deg)`;
+}
+
+function launch(endX, endY) {
+  isDragging = false;
+  line.style.display = 'none';
+  velocityX = (startX - endX) * 0.3;
+  velocityY = (startY - endY) * 0.3;
+  launched = true;
+  hello.style.cursor = 'default';
+}
+
+// PC
+hello.addEventListener('mousedown', e => {
+  if (launched || paused || e.clientX > window.innerWidth / 2) return;
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  line.style.display = 'block';
+});
+
+// 터치 대응
+hello.addEventListener('touchstart', e => {
+  const touch = e.touches[0];
+  if (launched || paused || touch.clientX > window.innerWidth / 2) return;
+  isDragging = true;
+  startX = touch.clientX;
+  startY = touch.clientY;
+  line.style.display = 'block';
+});
+
+document.addEventListener('mousemove', e => { if (isDragging) updateLine(e.clientX, e.clientY); });
+document.addEventListener('touchmove', e => { if (isDragging) updateLine(e.touches[0].clientX, e.touches[0].clientY); });
+document.addEventListener('mouseup', e => { if (isDragging) launch(e.clientX, e.clientY); });
+document.addEventListener('touchend', e => { if (isDragging) launch(e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
+
+function checkCollision(cx, cy, radius, rect) {
+  const rectX = rect.offsetLeft;
+  const rectY = rect.offsetTop;
+  const rectW = rect.offsetWidth;
+  const rectH = rect.offsetHeight;
+  const closestX = Math.max(rectX, Math.min(cx, rectX + rectW));
+  const closestY = Math.max(rectY, Math.min(cy, rectY + rectH));
+  return Math.hypot(cx - closestX, cy - closestY) < radius;
+}
+
+let animationRunning = false;
+function animate() {
+  if (animationRunning) return;
+  animationRunning = true;
+  function loop() {
+    if (paused) return requestAnimationFrame(loop);
+
+    for (let i = targets.length - 1; i >= 0; i--) {
+      const t = targets[i];
+      let x = parseFloat(t.style.left);
+      x -= 0.3;
+      if (x < baseZone) {
+        t.remove();
+        targets.splice(i, 1);
+        score = Math.max(0, score - 1);
+        scoreDiv.textContent = 'Score: ' + score;
+      } else {
+        t.style.left = x + 'px';
+      }
+    }
+
+    for (let t of targets) {
+      const tl = parseFloat(t.style.left);
+      const tr = tl + t.offsetWidth;
+      const dl = defenseLine.offsetLeft;
+      const dr = dl + defenseLine.offsetWidth;
+      if (tr > dl && tl < dr) return showGameOver();
+    }
+
+    if (launched) {
+      velocityY += gravity;
+      velocityX *= friction;
+      velocityY *= friction;
+      posX += velocityX;
+      posY += velocityY;
+
+      const radius = hello.offsetWidth / 2;
+      for (let i = targets.length - 1; i >= 0; i--) {
+        const t = targets[i];
+        if (checkCollision(posX + radius, posY + radius, radius, t)) {
+          if (t.dataset.lastHit != hitId) {
+            t.dataset.lastHit = hitId;
+            let hp = --t.dataset.hp;
+            t.querySelector('.health-fill').style.width = (hp / 3 * 100) + '%';
+            if (hp <= 0) {
+              score += parseInt(t.dataset.score);
+              scoreDiv.textContent = 'Score: ' + score;
+              t.remove();
+              targets.splice(i, 1);
+            }
+            bounce = Math.min(1, bounce + 0.1);
+            velocityX *= -bounce;
+            velocityY *= -bounce;
+          }
+        }
+      }
+
+      if (posY + hello.offsetHeight > window.innerHeight) {
+        posY = window.innerHeight - hello.offsetHeight;
+        velocityY *= -bounce;
+        velocityX *= bounce;
+        bounce *= 0.95;
+      }
+      if (posX < 0) {
+        posX = 0;
+        velocityX *= -bounce;
+        bounce *= 0.95;
+      }
+      if (posX + hello.offsetWidth > window.innerWidth) {
+        posX = window.innerWidth - hello.offsetWidth;
+        velocityX *= -bounce;
+        bounce *= 0.95;
+      }
+      hello.style.left = posX + 'px';
+      hello.style.top = posY + 'px';
+      if (bounce < 0.1 && posY + hello.offsetHeight >= window.innerHeight - 1) reset();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+animate();
+reset();
+
+document.addEventListener('visibilitychange', () => {
+  paused = document.hidden;
+  if (!paused) animate();
+});
+
+window.addEventListener('resize', () => {
+  targets.forEach(t => t.remove());
+  targets.length = 0;
+  for (let i = 0; i < 3; i++) createTarget();
+});
+
+function getSafeHeight() {
+  return window.visualViewport?.height || document.documentElement.clientHeight || window.innerHeight;
+}
+
+function createTarget() {
+  if (targets.length >= 7 || paused) return;
+  const isSquare = Math.random() < 0.2;
+  const t = document.createElement('div');
+  t.className = isSquare ? 'target-square' : 'target';
+  t.dataset.score = isSquare ? 2 : 1;
+  t.dataset.hp = 3;
+  t.dataset.lastHit = '0';
+  t.style.left = (window.innerWidth + 50) + 'px';
+
+  // 최대 높이 제한: 700px (컴퓨터 화면 기준)
+  const maxTop = Math.min(700, window.innerHeight - 130);
+  const topValue = Math.random() * maxTop + 50;
+  t.style.top = `${topValue}px`;
+
+  const healthBar = document.createElement('div');
+  healthBar.className = 'health-bar';
+  const healthFill = document.createElement('div');
+  healthFill.className = 'health-fill';
+  healthBar.appendChild(healthFill);
+  t.appendChild(healthBar);
+
+  document.body.appendChild(t);
+  targets.push(t);
+}
+
+
+
+// --- 초월 스킨 연동 부분 ---
+
+// 초월 스킨 20개 데이터
+
+  const transcendSkins = [
+  {
+    name: "초월-불꽃",
+    color: "orangered",
+    font: "Impact",
+    shadow: "0 0 15px orange",
+    glow: "orange",
+    border: "2px solid red",
+    background: "linear-gradient(45deg, darkred, orangered, gold)",
+    animation: "firePulse"
+  },
+  {
+    name: "초월-빙결",
+    color: "deepskyblue",
+    font: "Arial Black",
+    shadow: "0 0 12px lightblue",
+    glow: "#aaf0ff",
+    border: "2px solid #99ddff",
+    background: "linear-gradient(135deg, #ccf, #33f)",
+    animation: "iceFlicker"
+  },
+  {
+    name: "초월-번개",
+    color: "gold",
+    font: "Courier New",
+    shadow: "0 0 20px yellow",
+    glow: "yellow",
+    border: "2px dashed gold",
+    background: "linear-gradient(90deg, gold, white, gold)",
+    animation: "sparkFlash"
+  },
+  {
+    name: "초월-대지",
+    color: "saddlebrown",
+    font: "Georgia",
+    shadow: "0 0 10px peru",
+    glow: "#8B4513",
+    border: "2px solid #5d3a1a",
+    background: "linear-gradient(to bottom, #7b5e3b, #3e2a14)",
+    animation: "earthRumble"
+  },
+  {
+    name: "초월-폭풍",
+    color: "slateblue",
+    font: "Verdana",
+    shadow: "0 0 18px skyblue",
+    glow: "#87cefa",
+    border: "2px dotted #5f9ea0",
+    background: "linear-gradient(145deg, midnightblue, slateblue)",
+    animation: "stormWave"
+  },
+  {
+    name: "초월-어둠",
+    color: "black",
+    font: "Trebuchet MS",
+    shadow: "0 0 20px purple",
+    glow: "darkviolet",
+    border: "2px solid #222",
+    background: "linear-gradient(to right, black, darkviolet)",
+    animation: "shadowPulse"
+  },
+  {
+    name: "초월-빛",
+    color: "white",
+    font: "Lucida Console",
+    shadow: "0 0 20px white",
+    glow: "#ffffcc",
+    border: "2px double white",
+    background: "linear-gradient(45deg, #fff, gold, white)",
+    animation: "lightShine"
+  },
+  {
+    name: "초월-독",
+    color: "purple",
+    font: "Comic Sans MS",
+    shadow: "0 0 15px violet",
+    glow: "#cc66cc",
+    border: "2px groove purple",
+    background: "repeating-radial-gradient(circle, purple, darkgreen)",
+    animation: "poisonDrip"
+  },
+  {
+    name: "초월-시간",
+    color: "silver",
+    font: "Tahoma",
+    shadow: "0 0 10px gray",
+    glow: "#bbbbbb",
+    border: "2px solid #aaa",
+    background: "repeating-linear-gradient(45deg, silver, #888 10%)",
+    animation: "clockTick"
+  },
+  {
+    name: "초월-공간",
+    color: "navy",
+    font: "Palatino Linotype",
+    shadow: "0 0 15px darkblue",
+    glow: "#0000aa",
+    border: "2px solid #333366",
+    background: "radial-gradient(circle, navy, black)",
+    animation: "spaceTwist"
+  }
+  // ... 나머지도 동일 형식으로 이어서 구성 가능
 ];
 
-const transcendSkins = [
-  { name: "초월-불꽃", color: "orangered", font: "Impact" },
-  { name: "초월-빙결", color: "deepskyblue", font: "Arial Black" },
-  { name: "초월-번개", color: "gold", font: "Courier New" },
-  { name: "초월-대지", color: "saddlebrown", font: "Georgia" },
-  { name: "초월-폭풍", color: "slateblue", font: "Verdana" },
-  { name: "초월-어둠", color: "black", font: "Trebuchet MS" },
-  { name: "초월-빛", color: "white", font: "Lucida Console" },
-  { name: "초월-독", color: "purple", font: "Comic Sans MS" },
-  { name: "초월-시간", color: "silver", font: "Tahoma" },
-  { name: "초월-공간", color: "navy", font: "Palatino Linotype" },
-  { name: "초월-정령", color: "forestgreen", font: "Garamond" },
-  { name: "초월-금속", color: "gray", font: "Futura" },
-  { name: "초월-음속", color: "cyan", font: "Segoe UI" },
-  { name: "초월-용암", color: "crimson", font: "Rockwell" },
-  { name: "초월-눈보라", color: "lightblue", font: "Calibri" },
-  { name: "초월-환상", color: "mediumorchid", font: "Brush Script MT" },
-  { name: "초월-기계", color: "darkgray", font: "Roboto Mono" },
-  { name: "초월-유성", color: "firebrick", font: "Orbitron" },
-  { name: "초월-바다", color: "teal", font: "Quicksand" },
-  { name: "초월-우주", color: "darkslateblue", font: "Exo 2" }
-];
+// 기본 스킨 색상 매핑
+const colorMap = {
+  "기본": "white",
+  "빨강": "red",
+  "파랑": "blue",
+  "초록": "green",
+  "노랑": "yellow",
+  "보라": "purple",
+  "검정": "black",
+  "청록": "teal",
+  "핑크": "pink",
+  "레인보우": "linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)"
+};
 
-// 스킨 적용 함수 (미리보기용)
-function applyPreviewSkin() {
+// 로컬스토리지에서 선택된 일반 스킨과 초월 스킨 불러오기
+const selectedSkin = localStorage.getItem('helloSelectedSkin') || '기본';
+const selectedTransSkinName = localStorage.getItem('helloSelectedTransSkin') || '';
+
+// 초월 스킨 객체 찾기
+const selectedTransSkin = transcendSkins.find(s => s.name === selectedTransSkinName);
+
+// 스킨 적용 함수
+function applySkin() {
   if (selectedTransSkin) {
-    const tSkin = transcendSkins.find(s => s.name === selectedTransSkin);
-    if (tSkin) {
-      helloPreview.style.color = tSkin.color;
-      helloPreview.style.fontFamily = tSkin.font;
-      helloPreview.style.backgroundImage = 'none';
-      helloPreview.style.webkitBackgroundClip = '';
-      helloPreview.style.webkitTextFillColor = '';
-      return;
-    }
-  }
-  // 일반 스킨 적용
-  const skin = skins.find(s => s.name === selectedSkin);
-  if (skin) {
-    if (skin.name === '레인보우') {
-      helloPreview.style.backgroundImage = skin.color;
-      helloPreview.style.webkitBackgroundClip = "text";
-      helloPreview.style.webkitTextFillColor = "transparent";
-      helloPreview.style.color = 'unset';
-      helloPreview.style.fontFamily = '';
+    // 초월 스킨이 있으면 초월 스킨 우선 적용
+    hello.style.color = selectedTransSkin.color;
+    hello.style.fontFamily = selectedTransSkin.font;
+    hello.style.backgroundImage = 'none';
+    hello.style.webkitBackgroundClip = '';
+    hello.style.webkitTextFillColor = '';
+  } else {
+    // 초월 스킨이 없으면 일반 스킨 적용
+    if (selectedSkin === '레인보우') {
+      hello.style.backgroundImage = colorMap['레인보우'];
+      hello.style.webkitBackgroundClip = "text";
+      hello.style.webkitTextFillColor = "transparent";
+      hello.style.color = 'unset'; // 배경그라데이션으로 처리하므로 기본 color 해제
+      hello.style.fontFamily = ''; // 기본 폰트 유지
     } else {
-      helloPreview.style.backgroundImage = 'none';
-      helloPreview.style.webkitBackgroundClip = '';
-      helloPreview.style.webkitTextFillColor = '';
-      helloPreview.style.color = skin.color;
-      helloPreview.style.fontFamily = '';
+      hello.style.backgroundImage = 'none';
+      hello.style.webkitBackgroundClip = '';
+      hello.style.webkitTextFillColor = '';
+      hello.style.color = colorMap[selectedSkin] || 'white';
+      hello.style.fontFamily = '';
     }
-  } else {
-    // 기본 fallback
-    helloPreview.style.color = 'white';
-    helloPreview.style.fontFamily = '';
-    helloPreview.style.backgroundImage = 'none';
-    helloPreview.style.webkitBackgroundClip = '';
-    helloPreview.style.webkitTextFillColor = '';
   }
 }
 
-function showSkinCollection() {
-  popup.innerHTML = `<h3>보유 일반 스킨</h3>`;
-  ownedSkins.forEach(skinName => {
-    popup.innerHTML += `<button class="skin" onclick="chooseSkin('${skinName}')">${skinName}${selectedSkin === skinName && !selectedTransSkin ? '<span class="checkmark">✔</span>' : ''}</button>`;
-  });
-  popup.innerHTML += `<br><br><button onclick="drawSkin()">🔁 스킨 뽑기 (10점)</button>`;
-  popup.innerHTML += `<br><button onclick="closePopup()">닫기</button>`;
-  popup.style.display = 'block';
-}
 
-function showTransCollection() {
-  popup.innerHTML = `<h3>보유 초월 스킨</h3>`;
-  if (transSkins.length === 0) {
-    popup.innerHTML += `<p>❌ 아직 초월 스킨이 없습니다.</p>`;
-  } else {
-    transSkins.forEach(skin => {
-      popup.innerHTML += `<button class="skin" onclick="chooseTransSkin('${skin.name}')">🌠 ${skin.name}${selectedTransSkin === skin.name ? '<span class="checkmark">✔</span>' : ''}</button>`;
-    });
-  }
-  popup.innerHTML += `<br><button onclick="closePopup()">닫기</button>`;
-  popup.style.display = 'block';
-}
 
-function drawSkin() {
-  if (score < 10) {
-    alert("점수가 부족합니다! (10점 필요)");
-    return;
-  }
-  score -= 10;
-  const picked = skins[Math.floor(Math.random() * skins.length)];
-  if (!ownedSkins.includes(picked.name)) {
-    ownedSkins.push(picked.name);
-    alert(`🎉 새 스킨 획득! ${picked.name}`);
-  } else {
-    score += 2;
-    alert(`🔁 중복! 2점 반환 (${picked.name})`);
-  }
-  saveState();
-  updateDisplay();
-  showSkinCollection();
-}
+// 게임 시작 시 스킨 적용
+applySkin();
 
-function chooseSkin(name) {
-  selectedSkin = name;
-  selectedTransSkin = '';  // 일반 스킨 선택 시 초월 스킨 해제
-  saveState();
-  applyPreviewSkin();
-  showSkinCollection();
-}
-
-function chooseTransSkin(name) {
-  selectedTransSkin = name;
-  selectedSkin = '기본';   // 초월 스킨 선택 시 일반 스킨은 기본으로 설정
-  saveState();
-  applyPreviewSkin();
-  showTransCollection();
-}
-
-function tryTranscendence() {
-  // 일반 스킨 모두 보유 여부 확인 (skins 배열 기준)
-  const allOwned = skins.every(s => ownedSkins.includes(s.name));
-  if (!allOwned) {
-    alert("⚠️ 일반 스킨 10종을 모두 보유해야 초월할 수 있습니다.");
-    return;
-  }
-  // 아직 획득하지 않은 초월 스킨 중 하나 획득
-  const remaining = transcendSkins.filter(ts => !transSkins.some(t => t.name === ts.name));
-  if (remaining.length === 0) {
-    alert("🌟 초월 스킨을 모두 획득했습니다!");
-    return;
-  }
-  const pick = remaining[Math.floor(Math.random() * remaining.length)];
-  transSkins.push(pick);
-  transCount++;
-  // 일반 스킨 초기화
-  ownedSkins = ['기본'];
-  selectedSkin = '기본';
-  selectedTransSkin = '';
-  alert(`✨ 초월 성공! '${pick.name}' 스킨 획득!`);
-  saveState();
-  updateDisplay();
-  applyPreviewSkin();
-}
-
-function closePopup() {
-  popup.style.display = 'none';
-}
-
-function saveState() {
-  localStorage.setItem('helloSkins', JSON.stringify(ownedSkins));
-  localStorage.setItem('helloSelectedSkin', selectedSkin);
-  localStorage.setItem('helloSelectedTransSkin', selectedTransSkin);
-  localStorage.setItem('transSkins', JSON.stringify(transSkins));
-  localStorage.setItem('transCount', transCount);
-  localStorage.setItem('lastScore', score);
-}
-
-function updateDisplay() {
-  scoreDisplay.textContent = 'Score: ' + score;
-  starDisplay.textContent = `초월 횟수: ${transCount} ⭐`;
-}
-
-// 초기 표시
-updateDisplay();
-applyPreviewSkin();
 </script>
 </body>
 </html>
