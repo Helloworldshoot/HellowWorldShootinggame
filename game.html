@@ -336,9 +336,10 @@ function createTarget() {
   t.dataset.lastHit = '0';
   t.style.left = (window.innerWidth + 50) + 'px';
 
-  let maxTop = getSafeHeight() - 130;
-  if (maxTop < 0) maxTop = 0;
-  t.style.top = (Math.random() * maxTop + 50) + 'px';
+  // 최대 높이 제한: 700px (컴퓨터 화면 기준)
+  const maxTop = Math.min(700, window.innerHeight - 130);
+  const topValue = Math.random() * maxTop + 50;
+  t.style.top = `${topValue}px`;
 
   const healthBar = document.createElement('div');
   healthBar.className = 'health-bar';
@@ -350,6 +351,7 @@ function createTarget() {
   document.body.appendChild(t);
   targets.push(t);
 }
+
 
 
 // --- 초월 스킨 연동 부분 ---
