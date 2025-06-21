@@ -322,6 +322,36 @@ window.addEventListener('resize', () => {
   for (let i = 0; i < 3; i++) createTarget();
 });
 
+function getSafeHeight() {
+  return window.visualViewport?.height || document.documentElement.clientHeight || window.innerHeight;
+}
+
+function createTarget() {
+  if (targets.length >= 7 || paused) return;
+  const isSquare = Math.random() < 0.2;
+  const t = document.createElement('div');
+  t.className = isSquare ? 'target-square' : 'target';
+  t.dataset.score = isSquare ? 2 : 1;
+  t.dataset.hp = 3;
+  t.dataset.lastHit = '0';
+  t.style.left = (window.innerWidth + 50) + 'px';
+
+  let maxTop = getSafeHeight() - 130;
+  if (maxTop < 0) maxTop = 0;
+  t.style.top = (Math.random() * maxTop + 50) + 'px';
+
+  const healthBar = document.createElement('div');
+  healthBar.className = 'health-bar';
+  const healthFill = document.createElement('div');
+  healthFill.className = 'health-fill';
+  healthBar.appendChild(healthFill);
+  t.appendChild(healthBar);
+
+  document.body.appendChild(t);
+  targets.push(t);
+}
+
+
 // --- 초월 스킨 연동 부분 ---
 
 // 초월 스킨 20개 데이터
